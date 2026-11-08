@@ -2,7 +2,7 @@
 
 [English](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.md) | [简体中文](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.zh-CN.md)
 
-A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, caption-mode selection, and safe fallback.
+A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, caption-mode selection, caption quality checks, and safe fallback.
 
 **At a glance (defaults):**
 
@@ -46,6 +46,30 @@ print(decision.action, decision.reason, decision.retry_after)  # defer caption_p
 
 Screenshots get `caption_mode="auto"`. Resolve it with `choose_caption_mode(width, height, cfg)` once your adapter knows the real pixel size.
 
+## Caption Quality
+
+Length is a weak signal: a caption made entirely of placeholders can pass 40
+characters, and a model can copy the instruction back instead of describing the
+image. `caption_quality` adds three cheap heuristics:
+
+```python
+from mm_preprocess_kit import assess_caption, is_usable
+
+assess_caption("REM\n" + "\u25a1\n" * 32).issue   # "placeholder"
+assess_caption("transcribe every line... do not summarize").issue  # "prompt_echo"
+is_usable("21:30")                                # True
+```
+
+| Rule | Default | Rejects when |
+| --- | --- | --- |
+| `min_meaningful_chars` | 3 | fewer alphanumeric characters |
+| `placeholder_min_count` / `placeholder_ratio` | 4 / 2.0 | placeholders outnumber meaningful characters by more than 2x |
+| `echo_min_hits` | 2 | two or more instruction phrases are copied back |
+
+`assess_caption` returns the verdict plus the counts, so a rejected caption can
+be logged instead of silently dropped. Override `CaptionQualityConfig` to change
+the thresholds or supply the echo phrases of your own prompt.
+
 ## Policy Config Table
 
 | Field | Default | Meaning |
@@ -71,7 +95,7 @@ Screenshots get `caption_mode="auto"`. Resolve it with `choose_caption_mode(widt
 **Where this kit deliberately stops.** A production adapter usually does more than these four functions. The gaps below are intentional, and each one changes how you should wire the kit:
 
 - **Failure handling.** A real pipeline often pushes a placeholder ("media could not be described") instead of discarding the item. If yours does, map `caption_status="failed"` to `push_without_media`; reserve `drop_media` for pipelines that intentionally drop the item.
-- **Garbage captions.** The retry rule is length-based only, so a caption made entirely of placeholders can still pass the 40-character check. Run your own "is this text meaningful" check before marking an item `ready`.
+- **Garbage captions.** `caption_quality` covers the common shapes: placeholder density, prompt echo, and captions too short to be meaningful. A caption can still be wrong in ways these heuristics do not see; treat `is_usable` as a cheap filter, not a guarantee.
 - **Text-heavy gating.** `should_retry_caption` applies to every caption. Production may retry only screenshots or long images; call it only for those kinds instead of unconditionally.
 - **Thumbnail semantics.** `can_use_thumbnail` treats `local_path is None` as "no original is available". If the file exists but cannot be decoded, pass `None` rather than a path that will fail later.
 

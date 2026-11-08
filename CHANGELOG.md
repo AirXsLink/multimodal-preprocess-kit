@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.0] - 2026-11-08
+
+### Added
+
+- `caption_quality`: pure heuristics for judging whether a caption is usable.
+  Three rules cover the failure modes seen in production: placeholder density,
+  prompt echo, and captions with too few meaningful characters.
+- `assess_caption` returns the verdict plus evidence counts, so a rejection can
+  be logged instead of silently dropped.
+- `CaptionQualityConfig` to override the thresholds and the echo phrase list.
+- Top-level exports for `assess_caption`, `is_usable`, `count_meaningful` and
+  `count_placeholders`.
+
+### Changed
+
+- The test suite grew from 8 to 35 tests. Every `decide` branch, the
+  `max_defer_seconds` boundary, non-monotonic clocks, opt-in fallbacks and the
+  caption-quality heuristics are now covered.
+- README "Where this kit deliberately stops" now points at `caption_quality`
+  instead of leaving garbage captions entirely to the adapter.
+
 ## [0.1.1] - 2026-11-08
 
 ### Fixed

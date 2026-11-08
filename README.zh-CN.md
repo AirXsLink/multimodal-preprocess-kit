@@ -2,7 +2,7 @@
 
 [English](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.md) | [简体中文](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.zh-CN.md)
 
-一个与框架无关的聊天机器人多模态预处理策略库：描述重试、待推送消息延迟、抄写模式选择、安全降级。
+一个与框架无关的聊天机器人多模态预处理策略库：描述重试、待推送消息延迟、抄写模式选择、描述质量检查、安全降级。
 
 **速览（默认配置）：**
 
@@ -46,6 +46,26 @@ print(decision.action, decision.reason, decision.retry_after)  # defer caption_p
 
 截图会得到 `caption_mode="auto"`。等你的适配层知道真实像素尺寸后，用 `choose_caption_mode(width, height, cfg)` 解析它。
 
+## 描述质量
+
+长度是很弱的信号：全由占位符组成的描述可以轻松超过 40 字，模型也可能把提示词抄回来而不是描述画面。`caption_quality` 提供三条便宜的启发式：
+
+```python
+from mm_preprocess_kit import assess_caption, is_usable
+
+assess_caption("REM\n" + "\u25a1\n" * 32).issue   # "placeholder"
+assess_caption("transcribe every line... do not summarize").issue  # "prompt_echo"
+is_usable("21:30")                                # True
+```
+
+| 规则 | 默认值 | 判废条件 |
+| --- | --- | --- |
+| `min_meaningful_chars` | 3 | 有效字（字母/数字/汉字）少于该值 |
+| `placeholder_min_count` / `placeholder_ratio` | 4 / 2.0 | 占位符数量超过有效字的两倍 |
+| `echo_min_hits` | 2 | 命中两条及以上指令短语 |
+
+`assess_caption` 同时返回判定和计数，被拒的描述可以记日志而不是静默丢掉。可用 `CaptionQualityConfig` 改阈值，或传入你自己提示词的指令短语。
+
 ## 策略配置表
 
 | 字段 | 默认值 | 含义 |
@@ -71,7 +91,7 @@ print(decision.action, decision.reason, decision.retry_after)  # defer caption_p
 **这个库刻意止步的地方。** 生产环境的适配层通常比这四个函数做得多。下面这些缺口是有意的，每一条都会改变你接入的方式：
 
 - **失败处理。** 真实管线往往推送占位文案（「媒体无法描述」），而不是丢弃。如果你的管线如此，把 `caption_status="failed"` 映射为 `push_without_media`；`drop_media` 留给那些确实想丢弃的管线。
-- **垃圾描述。** 重试规则只基于长度，所以一段全由占位符组成的描述仍可能通过 40 字检查。在把条目标记为 `ready` 之前，先跑你自己的「这段文字是否有意义」检查。
+- **垃圾描述。** `caption_quality` 覆盖常见形状：占位符密度、提示词回显、有效字过少。启发式看不见的错误仍然存在，把 `is_usable` 当成便宜的过滤器，而不是保证。
 - **长图门槛。** `should_retry_caption` 对所有描述生效。生产环境可能只对截图或长图重试；只对这些类型调用，而不是无条件调用。
 - **缩略图语义。** `can_use_thumbnail` 把 `local_path is None` 视为「没有可用原图」。如果文件存在但无法解码，请传 `None`，而不是传一个稍后会失败的路径。
 
