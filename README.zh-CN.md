@@ -2,7 +2,7 @@
 
 [English](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.md) | [简体中文](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.zh-CN.md)
 
-一个与框架无关的聊天机器人多模态预处理策略库：描述重试、待推送消息延迟、安全降级。
+一个与框架无关的聊天机器人多模态预处理策略库：描述重试、待推送消息延迟、抄写模式选择、安全降级。
 
 **速览（默认配置）：**
 

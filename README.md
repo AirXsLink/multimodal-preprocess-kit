@@ -2,7 +2,7 @@
 
 [English](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.md) | [简体中文](https://github.com/AirXsLink/multimodal-preprocess-kit/blob/main/README.zh-CN.md)
 
-A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, and safe fallback.
+A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, caption-mode selection, and safe fallback.
 
 **At a glance (defaults):**
 

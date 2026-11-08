@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "multimodal-preprocess-kit"
 version = "0.1.1"
-description = "A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, and safe fallback."
+description = "A framework-agnostic policy kit for chatbot multimodal preprocessing: caption retry, pending-message deferral, caption-mode selection, and safe fallback."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
