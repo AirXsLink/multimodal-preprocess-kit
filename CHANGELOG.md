@@ -24,9 +24,9 @@ All notable changes to this project are documented in this file.
 
 - README and README.zh-CN language links now use absolute URLs, so they also
   work on PyPI.
-- Python 3.9 is no longer supported: it reached end of life in October 2025,
-  and its `setup-python` download fails intermittently with HTTP 504.
-  `requires-python` is now `>=3.10`.
+- Python 3.9 and 3.10 are no longer supported: both are end-of-life, and
+  their `setup-python` downloads fail with HTTP 504 on hosted runners.
+  `requires-python` is now `>=3.11`.
 
 ## [0.1.0] - 2026-11-06
 
