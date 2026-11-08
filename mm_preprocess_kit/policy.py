@@ -61,8 +61,10 @@ def decide(media: MediaItem, now: float, cfg: PolicyConfig) -> Decision:
         return Decision(action="retry_caption", reason="caption_too_short")
 
     if status == "pending":
-        waited = now - media.received_at
-        if waited <= cfg.max_defer_seconds:
+        # Clamp negative waits (a non-monotonic ``now``) to zero so that a
+        # clock jump cannot produce a deferral longer than the configured cap.
+        waited = max(0.0, now - media.received_at)
+        if waited < cfg.max_defer_seconds:
             return Decision(
                 action="defer",
                 reason="caption_pending",
