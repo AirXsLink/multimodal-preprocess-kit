@@ -30,8 +30,10 @@
 ## 安装
 
 ```bash
-pip install -e .
+pip install multimodal-preprocess-kit
 ```
+
+开发时在仓库根目录用 `pip install -e .`。
 
 ## 快速开始
 

@@ -30,8 +30,10 @@ Vision-language captions are often slower than the chat message buffer. A bot ma
 ## Install
 
 ```bash
-pip install -e .
+pip install multimodal-preprocess-kit
 ```
+
+For development, install from a checkout with `pip install -e .`.
 
 ## Quick Start
 
